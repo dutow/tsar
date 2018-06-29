@@ -1,5 +1,4 @@
 
-#include <boost/hana.hpp>
 #include <type_traits>
 
 #include "tsar/standard_tuple.hpp"
@@ -110,8 +109,6 @@ class context_aware_tuple_helper<TUPLE_T, std::index_sequence<Is...>, T...> {
     template <typename TX>
     friend struct lifecycle_proxy;
   };
-
-  using type_list = decltype(boost::hana::make_tuple(boost::hana::type_c<real_type_for<T, Is>>...));
 
  public:
   using type = generic_standard_tuple<lifecycle_proxy, wrapper_type_for<T, Is>...>;

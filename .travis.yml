@@ -1,0 +1,65 @@
+language: cpp
+sudo: true
+
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages: ['gcc-7', 'g++-7']
+    - os: linux
+      compiler: gcc
+      env:
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages: ['gcc-8', 'g++-8']
+    - os: linux
+      compiler: clang
+      env:
+        - MATRIX_EVAL="export CC=clang-5.0 && export CXX=clang++-5.0"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages: ['clang-5.0', 'gcc-7', 'g++-7']
+    - os: linux
+      compiler: clang
+      env:
+        - MATRIX_EVAL="export CC=clang-6.0 && export CXX=clang++-6.0"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages: ['clang-6.0', 'gcc-7', 'g++-7']
+
+install:
+  - mkdir .tmp
+  - curl -L https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip -o .tmp/ninja-linux.zip
+  - unzip .tmp/ninja-linux.zip -d .tmp
+
+before_script:
+  - export PATH=$PATH:$PWD/.tmp
+  - eval "${MATRIX_EVAL}"
+  - $CC --version
+  - $CXX --version
+  - cmake --version
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ../
+  - ninja
+  - ctest . --output-on-failure -V
