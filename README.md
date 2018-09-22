@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/dutow/tsar.svg?branch=master)](https://travis-ci.org/dutow/tsar)
+[![Travis Status](https://travis-ci.org/dutow/tsar.svg?branch=master)](https://travis-ci.org/dutow/tsar)
+[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/github/dutow/tsar)](https://ci.appveyor.com/api/projects/status/github/dutow/tsar)
 
 What's this?
 ===
