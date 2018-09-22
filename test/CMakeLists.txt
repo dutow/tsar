@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(test_tsar test_typesort.cxx)
+ADD_EXECUTABLE(test_tsar typesort_test.cxx)
 
 #ADD_EXECUTABLE(test_standard_storage standard_storage_test.cxx)
 

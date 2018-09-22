@@ -1,16 +1,16 @@
 
 #include "tsar/typesort.hpp"
 
-static_assert(tsar::larger_or_earlier_types<int,int,double,int>(0) == 1);
-static_assert(tsar::larger_or_earlier_types<int,int,double,int>(1) == 2);
-static_assert(tsar::larger_or_earlier_types<int,int,double,int>(2) == 0);
-static_assert(tsar::larger_or_earlier_types<int,int,double,int>(3) == 3);
+static_assert(tsar::larger_or_earlier_types<int, int, double, int>(0) == 1);
+static_assert(tsar::larger_or_earlier_types<int, int, double, int>(1) == 2);
+static_assert(tsar::larger_or_earlier_types<int, int, double, int>(2) == 0);
+static_assert(tsar::larger_or_earlier_types<int, int, double, int>(3) == 3);
 
 struct ch3 {
   char c[3];
 };
 
-static const constexpr auto descending = tsar::descending_type_order<int,int,char,double,int,ch3>();
+static const constexpr auto descending = tsar::descending_type_order<int, int, char, double, int, ch3>();
 static_assert(std::get<0>(descending) == tsar::type_ordering<int, 1>{});
 static_assert(std::get<1>(descending) == tsar::type_ordering<int, 2>{});
 static_assert(std::get<2>(descending) == tsar::type_ordering<char, 4>{});
@@ -25,7 +25,7 @@ static_assert(tsar::idx_for_nth_type_in_order(3, descending) == 4);
 static_assert(tsar::idx_for_nth_type_in_order(4, descending) == 2);
 static_assert(tsar::idx_for_nth_type_in_order(5, descending) == 5);
 
-static_assert(tsar::type_ordering_for_nth_type_in_order<0>(descending) == tsar::type_ordering<double,0>{});
+static_assert(tsar::type_ordering_for_nth_type_in_order<0>(descending) == tsar::type_ordering<double, 0>{});
 
 static const constexpr auto indices = tsar::calculate_indices(descending);
 static_assert(indices[0] == 1);
@@ -56,7 +56,4 @@ static_assert(ordered_offsets[3].align == 4);
 static_assert(ordered_offsets[4].align == 1);
 static_assert(ordered_offsets[5].align == 1);
 
-int main() {
-  return 0;
-}
-
+int main() { return 0; }

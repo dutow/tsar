@@ -49,8 +49,7 @@ class context_aware_tuple_helper<TUPLE_T, std::index_sequence<Is...>, T...> {
   using dummy_tuple_t = standard_storage<T<context_aware_dummy>...>;
 
   template <template <typename> typename TT, size_t IDX>
-  using real_type_for =
-      TT<context_aware_reference<context_aware_tuple<T...>, IDX, dummy_tuple_t::offset_for(IDX)>>;
+  using real_type_for = TT<context_aware_reference<context_aware_tuple<T...>, IDX, dummy_tuple_t::offset_for(IDX)>>;
 
   template <typename TT>
   struct lifecycle_proxy {

@@ -135,4 +135,4 @@ class standard_tuple : public generic_standard_tuple<standard_tuple_lifecycle_pr
   using generic_standard_tuple<standard_tuple_lifecycle_proxy, T...>::generic_standard_tuple;
 };
 
-}
+}  // namespace tsar
