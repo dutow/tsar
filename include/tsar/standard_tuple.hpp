@@ -1,3 +1,6 @@
+
+#include <tuple>
+
 #include "tsar/standard_storage.hpp"
 #include "tsar/typewrap.hpp"
 
@@ -145,6 +148,11 @@ class standard_tuple_impl<MAPPING_T, LIFECYCLE_T, std::index_sequence<Is...>, T.
   }
 
   constexpr static size_t size() { return sizeof...(T); }
+
+  using std_tuple_t = std::tuple<T...>;
+
+  template <size_t IDX>
+  using nth_type = typename std::tuple_element<IDX, std_tuple_t>::type;
 };
 
 template <typename MAPPING_T, template <typename> typename LIFECYCLE_PROXY, typename... T>

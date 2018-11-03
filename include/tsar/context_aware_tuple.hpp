@@ -1,11 +1,16 @@
 
+#pragma once
+
 #include <type_traits>
 
 #include "tsar/standard_tuple.hpp"
 
 namespace tsar {
 
-struct context_aware_dummy {};
+template <typename TUPLE_T>
+struct context_aware_dummy {
+  using tuple_t = TUPLE_T;
+};
 
 template <typename TUPLE_T, size_t IDX, size_t OFFSET>
 struct context_aware_reference {
@@ -35,9 +40,6 @@ struct context_aware_helper {
   }
 };
 
-template <typename MAPPING_T, template <typename> typename... T>
-class generic_context_aware_tuple;
-
 template <typename MAPPING_T, typename TUPLE_T, typename I, template <typename> typename... T>
 class context_aware_tuple_helper;
 
@@ -46,11 +48,11 @@ class context_aware_tuple_helper<MAPPING_T, TUPLE_T, std::index_sequence<Is...>,
  private:
   using real_type = TUPLE_T;
 
-  using dummy_tuple_t = standard_storage<T<context_aware_dummy>...>;
+  using dummy_tuple_t = standard_storage<T<context_aware_dummy<TUPLE_T>>...>;
+  using std_tuple_t = std::tuple<T<context_aware_dummy<TUPLE_T>>...>;
 
   template <template <typename> typename TT, size_t IDX>
-  using real_type_for =
-      TT<context_aware_reference<generic_context_aware_tuple<MAPPING_T, T...>, IDX, dummy_tuple_t::offset_for(IDX)>>;
+  using real_type_for = TT<context_aware_reference<TUPLE_T, IDX, dummy_tuple_t::offset_for(IDX)>>;
 
   template <typename TT>
   struct lifecycle_proxy {
@@ -89,10 +91,16 @@ class context_aware_tuple_helper<MAPPING_T, TUPLE_T, std::index_sequence<Is...>,
 
   template <template <typename> typename TT, size_t IDX>
   struct wrapper_type_for : public real_type_for<TT, IDX> {
+   public:
     wrapper_type_for& operator=(wrapper_type_for const&) = default;
     wrapper_type_for& operator=(wrapper_type_for&&) = default;
 
-   public:
+    template <typename TTT>
+    wrapper_type_for& operator=(TTT const& o) {
+      static_cast<real_type_for<TT, IDX>&>(*this) = o;
+      return *this;
+    }
+
    private:
     wrapper_type_for() : real_type_for<TT, IDX>() {}
 

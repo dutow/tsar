@@ -94,8 +94,14 @@ struct kittens {
     return kittens<ITEMS..., pair<KEY, ITEM>>{};
   }
 
+  template <template <typename> typename ITEM, typename KEY>
+  auto prepend(KEY k) {
+    return kittens<pair<KEY, ITEM>, ITEMS...>{};
+  }
+
   auto build() { return kitten_march<ITEMS...>::build(); }
 
+  using march_t = kitten_march<ITEMS...>;
   using tuple_t = typename kitten_march<ITEMS...>::tuple_t;
 };
 
