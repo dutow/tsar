@@ -2,6 +2,9 @@
 #include <catch.hpp>
 
 #include "tsar/context_aware_tuple.hpp"
+#include "tsar/typewrap_literals.hpp"
+
+using namespace tsar::literals;
 
 namespace {
 template <typename CTX>
@@ -37,7 +40,7 @@ TEST_CASE("Context aware tupes can be used with default constructors") {
   REQUIRE(tup.get<0>().first() == 42);
   REQUIRE(tup.get<0>().second() == 42);
   REQUIRE(tup.get<1>().first() == 42);
-  REQUIRE(tup.get<1>().second() == 42);
+  REQUIRE(tup.get(1_c).second() == 42);
 }
 
 TEST_CASE("Context aware tupes can be used with non default constructors") {
@@ -45,7 +48,7 @@ TEST_CASE("Context aware tupes can be used with non default constructors") {
 
   REQUIRE(tup.get<0>().first() == 4);
   REQUIRE(tup.get<0>().second() == 42);
-  REQUIRE(tup.get<1>().first() == 4);
+  REQUIRE(tup.get(1_c).first() == 4);
   REQUIRE(tup.get<1>().second() == 42);
 }
 
@@ -66,7 +69,7 @@ TEST_CASE("Context aware tupes can be moved") {
   tup.get<0>().i = 55;  // NOLINT: bugprone-use-after-move
 
   REQUIRE(another_tup.get<0>().first() == 4);
-  REQUIRE(another_tup.get<0>().second() == 42);
+  REQUIRE(another_tup.get(0_c).second() == 42);
   REQUIRE(another_tup.get<1>().first() == 4);
   REQUIRE(another_tup.get<1>().second() == 42);
 }

@@ -4,6 +4,9 @@
 #include <functional>
 
 #include "tsar/standard_tuple.hpp"
+#include "tsar/typewrap_literals.hpp"
+
+using namespace tsar::literals;
 
 static_assert(tsar::standard_tuple<int, bool, short>::offset<1>() == 6, "Offset usable and correct");
 
@@ -26,6 +29,7 @@ TEST_CASE("Standard tuples elements can be assigned") {
   f0 += 5;
 
   REQUIRE(tup.get<0>() == 47);
+  REQUIRE(tup.get(0_c) == 47);
 }
 
 TEST_CASE("Standard tuples have a size") {

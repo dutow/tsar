@@ -4,3 +4,4 @@ ColumnLimit: 120
 ---
 Language: Cpp
 Standard: Cpp11
+DerivePointerAlignment: false

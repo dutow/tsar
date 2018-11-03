@@ -35,21 +35,22 @@ struct context_aware_helper {
   }
 };
 
-template <template <typename> typename... T>
-class context_aware_tuple;
+template <typename MAPPING_T, template <typename> typename... T>
+class generic_context_aware_tuple;
 
-template <typename TUPLE_T, typename I, template <typename> typename... T>
+template <typename MAPPING_T, typename TUPLE_T, typename I, template <typename> typename... T>
 class context_aware_tuple_helper;
 
-template <typename TUPLE_T, size_t... Is, template <typename> typename... T>
-class context_aware_tuple_helper<TUPLE_T, std::index_sequence<Is...>, T...> {
+template <typename MAPPING_T, typename TUPLE_T, size_t... Is, template <typename> typename... T>
+class context_aware_tuple_helper<MAPPING_T, TUPLE_T, std::index_sequence<Is...>, T...> {
  private:
   using real_type = TUPLE_T;
 
   using dummy_tuple_t = standard_storage<T<context_aware_dummy>...>;
 
   template <template <typename> typename TT, size_t IDX>
-  using real_type_for = TT<context_aware_reference<context_aware_tuple<T...>, IDX, dummy_tuple_t::offset_for(IDX)>>;
+  using real_type_for =
+      TT<context_aware_reference<generic_context_aware_tuple<MAPPING_T, T...>, IDX, dummy_tuple_t::offset_for(IDX)>>;
 
   template <typename TT>
   struct lifecycle_proxy {
@@ -110,18 +111,27 @@ class context_aware_tuple_helper<TUPLE_T, std::index_sequence<Is...>, T...> {
   };
 
  public:
-  using type = generic_standard_tuple<lifecycle_proxy, wrapper_type_for<T, Is>...>;
+  using type = generic_standard_tuple<MAPPING_T, lifecycle_proxy, wrapper_type_for<T, Is>...>;
 
   static_assert(sizeof(dummy_tuple_t) == sizeof(type),
                 "Member types have the same size regardless of the context parameter");
 };
 
-template <template <typename> typename... T>
-class context_aware_tuple
-    : public context_aware_tuple_helper<context_aware_tuple<T...>, std::make_index_sequence<sizeof...(T)>, T...>::type {
+template <typename MAPPING_T, template <typename> typename... T>
+class generic_context_aware_tuple
+    : public context_aware_tuple_helper<MAPPING_T, generic_context_aware_tuple<MAPPING_T, T...>,
+                                        std::make_index_sequence<sizeof...(T)>, T...>::type {
  public:
-  using base_t = typename context_aware_tuple_helper<context_aware_tuple<T...>, std::make_index_sequence<sizeof...(T)>,
-                                                     T...>::type;
+  using base_t = typename context_aware_tuple_helper<MAPPING_T, generic_context_aware_tuple<MAPPING_T, T...>,
+                                                     std::make_index_sequence<sizeof...(T)>, T...>::type;
+
+  using base_t::base_t;
+};
+
+template <template <typename> typename... T>
+class context_aware_tuple : public generic_context_aware_tuple<index_mapping, T...> {
+ public:
+  using base_t = generic_context_aware_tuple<index_mapping, T...>;
 
   using base_t::base_t;
 };

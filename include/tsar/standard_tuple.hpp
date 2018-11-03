@@ -1,6 +1,19 @@
 #include "tsar/standard_storage.hpp"
+#include "tsar/typewrap.hpp"
 
 namespace tsar {
+
+struct index_mapping {
+  template <typename T>
+  constexpr static auto index_for(T const& /* unused */) {
+    static_assert("Unknown key");
+  }
+
+  template <int I>
+  constexpr static auto index_for(int_t<I> const& /* unused */) {
+    return I;
+  }
+};
 
 template <typename T>
 struct standard_tuple_lifecycle_proxy {
@@ -37,11 +50,11 @@ struct standard_tuple_lifecycle_proxy {
   }
 };
 
-template <template <typename> typename LIFECYCLE_T, typename I, typename... T>
+template <typename MAPPING_T, template <typename> typename LIFECYCLE_T, typename I, typename... T>
 class standard_tuple_impl;
 
-template <template <typename> typename LIFECYCLE_T, size_t... Is, typename... T>
-class standard_tuple_impl<LIFECYCLE_T, std::index_sequence<Is...>, T...> {
+template <typename MAPPING_T, template <typename> typename LIFECYCLE_T, size_t... Is, typename... T>
+class standard_tuple_impl<MAPPING_T, LIFECYCLE_T, std::index_sequence<Is...>, T...> {
  private:
   using storage_t = standard_storage<T...>;
   storage_t data_;
@@ -103,6 +116,16 @@ class standard_tuple_impl<LIFECYCLE_T, std::index_sequence<Is...>, T...> {
   bool operator==(standard_tuple_impl const& o) const { return (... && (get<Is>() == o.get<Is>())); }
   bool operator!=(standard_tuple_impl const& o) const { return (... || (get<Is>() != o.get<Is>())); }
 
+  template <typename TT>
+  auto& get(TT const& /* unused */) {
+    return get<MAPPING_T::template index_for(TT{})>();
+  }
+
+  template <typename TT>
+  auto const& get(TT const& /* unused */) const {
+    return get<MAPPING_T::template index_for(TT{})>();
+  }
+
   template <size_t IDX>
   auto& get() {
     static_assert(IDX < size(), "Overindexing a standard tuple");
@@ -124,15 +147,16 @@ class standard_tuple_impl<LIFECYCLE_T, std::index_sequence<Is...>, T...> {
   constexpr static size_t size() { return sizeof...(T); }
 };
 
-template <template <typename> typename LIFECYCLE_PROXY, typename... T>
+template <typename MAPPING_T, template <typename> typename LIFECYCLE_PROXY, typename... T>
 class generic_standard_tuple
-    : public standard_tuple_impl<LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>, T...> {
-  using standard_tuple_impl<LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>, T...>::standard_tuple_impl;
+    : public standard_tuple_impl<MAPPING_T, LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>, T...> {
+  using standard_tuple_impl<MAPPING_T, LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>,
+                            T...>::standard_tuple_impl;
 };
 
 template <typename... T>
-class standard_tuple : public generic_standard_tuple<standard_tuple_lifecycle_proxy, T...> {
-  using generic_standard_tuple<standard_tuple_lifecycle_proxy, T...>::generic_standard_tuple;
+class standard_tuple : public generic_standard_tuple<index_mapping, standard_tuple_lifecycle_proxy, T...> {
+  using generic_standard_tuple<index_mapping, standard_tuple_lifecycle_proxy, T...>::generic_standard_tuple;
 };
 
 }  // namespace tsar
