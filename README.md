@@ -4,35 +4,18 @@
 What's this?
 ===
 
-`tsar` is a prototype for:
+`tsar` is a C++17 library providing two new (named and sorted) tuple types:
 
- * providing instantation context aware types for C++
- * with the ability to add requirements on the context with user friendly messages (this is a TODO)
+ * the `standard_tuple`, which is a guaranteed standard layout type, no matter the members, and knows the offsets of each data member
+ * the `context_aware_tuple`, which allows the tuple members to access each other.
 
-As an example, see the following simple snippet:
+Motivation
+---
 
-```
-struct throttle;
-struct engine;
-struct wheel;
+The motivation behind these types is to provide an easy way to implement types such as:
 
-struct car {
-  throttle throttle_;
-  engine engine_;
-  wheel wheels_[4];
-};
-
-car car_;
-std::cout << car_.wheels_[0].angular_velocity_;
-car_.throttle_.press();
-// should be higher now
-std::cout << car_.wheels_[0].angular_velocity_;
-```
-
-The goal is to make this program work - with some changes, of course --, but without:
-
- * adding pointers to the other data members to the component classes
- * moving the press method to a different class
- * restricting the usability of the component types to this specific `car` type
-
+ * **Memory efficient, user friendly observers**: observable types, where the list of observers is storend in the container, yet the `observe` function is added to each data member. An example implementation can be found in `tsar::observable`.
+ * **Typesafe vertex attributes**: Graphical applications usually represent vertex data using untyped arrays, accessing members with pointers with needed. Standard tuples provide a simple way to define vertex layouts with an automatically generated data type.
+ * **Pure C++ ORM framework**: A simple object relational mapping library, without compiler extensions is one of the greatest challanges in C++. Similarly to the observable types, it can also be implemented using context aware types, without depending on external tools.
+ * **A user friendly, type safe way to implement modular applications**, where modules all have requirements (such as about the existence of other modules), and can be used as simple building blocks. This would allow several configurable embedded applications (printers, cars, and so on) to use the C++ type system instead of runtime or macro based configuration.
 
