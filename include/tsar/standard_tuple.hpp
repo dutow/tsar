@@ -53,13 +53,13 @@ struct standard_tuple_lifecycle_proxy {
   }
 };
 
-template <typename MAPPING_T, template <typename> typename LIFECYCLE_T, typename I, typename... T>
+template <ordering O, typename MAPPING_T, template <typename> typename LIFECYCLE_T, typename I, typename... T>
 class standard_tuple_impl;
 
-template <typename MAPPING_T, template <typename> typename LIFECYCLE_T, size_t... Is, typename... T>
-class standard_tuple_impl<MAPPING_T, LIFECYCLE_T, std::index_sequence<Is...>, T...> {
+template <ordering O, typename MAPPING_T, template <typename> typename LIFECYCLE_T, size_t... Is, typename... T>
+class standard_tuple_impl<O, MAPPING_T, LIFECYCLE_T, std::index_sequence<Is...>, T...> {
  private:
-  using storage_t = standard_storage<T...>;
+  using storage_t = standard_storage<O, T...>;
   storage_t data_;
 
   template <typename... Ts>
@@ -155,16 +155,25 @@ class standard_tuple_impl<MAPPING_T, LIFECYCLE_T, std::index_sequence<Is...>, T.
   using nth_type = typename std::tuple_element<IDX, std_tuple_t>::type;
 };
 
-template <typename MAPPING_T, template <typename> typename LIFECYCLE_PROXY, typename... T>
+template <ordering O, typename MAPPING_T, template <typename> typename LIFECYCLE_PROXY, typename... T>
 class generic_standard_tuple
-    : public standard_tuple_impl<MAPPING_T, LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>, T...> {
-  using standard_tuple_impl<MAPPING_T, LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>,
+    : public standard_tuple_impl<O, MAPPING_T, LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>, T...> {
+  using standard_tuple_impl<O, MAPPING_T, LIFECYCLE_PROXY, std::make_index_sequence<sizeof...(T)>,
                             T...>::standard_tuple_impl;
 };
 
 template <typename... T>
-class standard_tuple : public generic_standard_tuple<index_mapping, standard_tuple_lifecycle_proxy, T...> {
-  using generic_standard_tuple<index_mapping, standard_tuple_lifecycle_proxy, T...>::generic_standard_tuple;
+class standard_tuple
+    : public generic_standard_tuple<ordering::original, index_mapping, standard_tuple_lifecycle_proxy, T...> {
+  using generic_standard_tuple<ordering::original, index_mapping, standard_tuple_lifecycle_proxy,
+                               T...>::generic_standard_tuple;
+};
+
+template <typename... T>
+class sorted_standard_tuple
+    : public generic_standard_tuple<ordering::optimal, index_mapping, standard_tuple_lifecycle_proxy, T...> {
+  using generic_standard_tuple<ordering::optimal, index_mapping, standard_tuple_lifecycle_proxy,
+                               T...>::generic_standard_tuple;
 };
 
 }  // namespace tsar

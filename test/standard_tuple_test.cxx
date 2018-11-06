@@ -2,13 +2,23 @@
 #include <catch.hpp>
 
 #include <functional>
+#include <iostream>
 
 #include "tsar/standard_tuple.hpp"
 #include "tsar/typewrap_literals.hpp"
 
 using namespace tsar::literals;
 
-static_assert(tsar::standard_tuple<int, bool, short>::offset<1>() == 6, "Offset usable and correct");
+static_assert(tsar::sorted_standard_tuple<int, bool, short>::offset<1>() == 6, "Offset usable and correct");
+static_assert(alignof(tsar::sorted_standard_tuple<int, bool, short>) == 4, "Alignment is correct");
+
+static_assert(tsar::standard_tuple<short, bool, bool, int, short, int>::offset<1>() == 2, "Offset usable and correct");
+static_assert(tsar::standard_tuple<short, bool, bool, int, short, int>::offset<2>() == 3, "Offset usable and correct");
+static_assert(tsar::standard_tuple<short, bool, bool, int, short, int>::offset<3>() == 4, "Offset usable and correct");
+static_assert(tsar::standard_tuple<short, bool, bool, int, short, int>::offset<4>() == 8, "Offset usable and correct");
+static_assert(tsar::standard_tuple<short, bool, bool, int, short, int>::offset<5>() == 12, "Offset usable and correct");
+static_assert(alignof(tsar::standard_tuple<short, bool, bool, int, short, int>) == 4, "Alignment correct");
+static_assert(alignof(tsar::standard_tuple<short, bool>) == 2, "Alignment correct");
 
 TEST_CASE("Standard tuples can be constructed") {
   tsar::standard_tuple<int, bool, short> tup{42, false, 3};

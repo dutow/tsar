@@ -48,7 +48,7 @@ class context_aware_tuple_helper<MAPPING_T, TUPLE_T, std::index_sequence<Is...>,
  private:
   using real_type = TUPLE_T;
 
-  using dummy_tuple_t = standard_storage<T<context_aware_dummy<TUPLE_T>>...>;
+  using dummy_tuple_t = standard_storage<ordering::optimal, T<context_aware_dummy<TUPLE_T>>...>;
   using std_tuple_t = std::tuple<T<context_aware_dummy<TUPLE_T>>...>;
 
   template <template <typename> typename TT, size_t IDX>
@@ -119,7 +119,7 @@ class context_aware_tuple_helper<MAPPING_T, TUPLE_T, std::index_sequence<Is...>,
   };
 
  public:
-  using type = generic_standard_tuple<MAPPING_T, lifecycle_proxy, wrapper_type_for<T, Is>...>;
+  using type = generic_standard_tuple<ordering::optimal, MAPPING_T, lifecycle_proxy, wrapper_type_for<T, Is>...>;
 
   static_assert(sizeof(dummy_tuple_t) == sizeof(type),
                 "Member types have the same size regardless of the context parameter");

@@ -4,7 +4,6 @@
 #include <array>
 #include <tuple>
 
-
 namespace tsar {
 
 template <typename T, std::size_t order_t>
@@ -28,7 +27,6 @@ constexpr std::size_t larger_or_earlier_types(std::size_t idx) {
   return match;
 }
 
-// internal helper
 template <typename... Tall, std::size_t... Tidx>
 constexpr auto descending_type_order_impl(std::index_sequence<Tidx...>) {
   return std::make_tuple(type_ordering<Tall, larger_or_earlier_types<Tall...>(Tidx)>{}...);
@@ -37,6 +35,16 @@ constexpr auto descending_type_order_impl(std::index_sequence<Tidx...>) {
 template <typename... Tall>
 constexpr auto descending_type_order() {
   return descending_type_order_impl<Tall...>(std::make_index_sequence<sizeof...(Tall)>());
+}
+
+template <typename... Tall, std::size_t... Tidx>
+constexpr auto original_type_order_impl(std::index_sequence<Tidx...>) {
+  return std::make_tuple(type_ordering<Tall, Tidx>{}...);
+}
+
+template <typename... Tall>
+constexpr auto original_type_order() {
+  return original_type_order_impl<Tall...>(std::make_index_sequence<sizeof...(Tall)>());
 }
 
 // internal helper

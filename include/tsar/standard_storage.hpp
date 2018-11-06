@@ -1,14 +1,31 @@
 
 #pragma once
 
+#include <tuple>
 #include <type_traits>
 #include "tsar/typesort.hpp"
 
 namespace tsar {
+
+enum class ordering { original, optimal };
+
+template <ordering O, typename... T>
+struct standard_storage_ordering;
+
 template <typename... T>
-class standard_storage {
- private:
+struct standard_storage_ordering<ordering::optimal, T...> {
   static constexpr auto ordering = descending_type_order<T...>();
+};
+
+template <typename... T>
+struct standard_storage_ordering<ordering::original, T...> {
+  static constexpr auto ordering = original_type_order<T...>();
+};
+
+template <ordering O, typename... T>
+class standard_storage : private standard_storage_ordering<O, T...> {
+ private:
+  static constexpr auto ordering = standard_storage_ordering<O, T...>::ordering;
 
  public:
   template <std::size_t IDX>
@@ -48,7 +65,9 @@ class standard_storage {
 
   constexpr static std::size_t nth_offset(std::size_t idx) { return layout[indexing[idx]].offset; }
 
-  alignas(layout[0].align) char data_[size_in_bytes()];
+  static constexpr size_t maxalign() { return alignof(std::tuple<T...>); }
+
+  alignas(maxalign()) char data_[size_in_bytes()];
 };
 
 }  // namespace tsar
