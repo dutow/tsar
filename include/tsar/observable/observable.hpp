@@ -85,8 +85,8 @@ template <typename... T>
 struct inside_march_t {};
 
 template <template <typename> typename... ITEMS, typename... KEYS>
-struct inside_march_t<detail::pair<KEYS, ITEMS>...> {
-  inside_march_t(detail::kitten_march<detail::pair<KEYS, ITEMS>...>) {}
+struct inside_march_t<cat_detail::pair<KEYS, ITEMS>...> {
+  inside_march_t(cat_detail::kitten_march<cat_detail::pair<KEYS, ITEMS>...>) {}
 
   template <typename CTX>
   static auto build() {
@@ -95,14 +95,14 @@ struct inside_march_t<detail::pair<KEYS, ITEMS>...> {
 };
 
 template <template <typename> typename... ITEMS, typename... KEYS>
-auto inside_march(detail::kitten_march<detail::pair<KEYS, ITEMS>...> const& o) {
-  return inside_march_t<detail::pair<KEYS, ITEMS>...>{o};
+auto inside_march(cat_detail::kitten_march<cat_detail::pair<KEYS, ITEMS>...> const& o) {
+  return inside_march_t<cat_detail::pair<KEYS, ITEMS>...>{o};
 }
 
 template <typename... T, template <typename> typename WRAP>
-class observable<detail::kittens<T...>, WRAP> {
+class observable<cat_detail::kittens<T...>, WRAP> {
   using kittens_t = typename decltype(
-      typename detail::kittens<T...>{}.template prepend<observer_forwarder>(observer_registry_marker{}))::march_t;
+      typename cat_detail::kittens<T...>{}.template prepend<observer_forwarder>(observer_registry_marker{}))::march_t;
   using inside_t = decltype(inside_march(kittens_t{}));
 
  public:

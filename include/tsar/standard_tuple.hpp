@@ -141,6 +141,11 @@ class standard_tuple_impl<O, MAPPING_T, LIFECYCLE_T, std::index_sequence<Is...>,
     return data_.template get<IDX>();
   }
 
+  template <typename TT>
+  constexpr static size_t offset(TT const& /* unused */) {
+    return offset<MAPPING_T::template index_for(TT{})>();
+  }
+
   template <size_t IDX>
   constexpr static size_t offset() {
     static_assert(IDX < size(), "Overindexing a standard tuple");

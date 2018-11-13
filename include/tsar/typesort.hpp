@@ -19,7 +19,7 @@ constexpr std::size_t larger_or_earlier_types(std::size_t idx) {
   const std::size_t sizes[] = {alignof(Tall)...};
   const std::size_t size = sizes[idx];
   std::size_t match = 0;
-  for (int i = 0; i < sizeof...(Tall); ++i) {
+  for (std::size_t i = 0; i < sizeof...(Tall); ++i) {
     if (sizes[i] > size || (sizes[i] == size && i < idx)) {
       match++;
     }
@@ -56,7 +56,7 @@ constexpr std::size_t idx_for_type_ordering() {
 template <typename... Tall>  // type_ordering<T>...
 constexpr std::size_t idx_for_nth_type_in_order(std::size_t n, std::tuple<Tall...> = {}) {
   const std::size_t idxs[] = {idx_for_type_ordering<Tall>()...};
-  for (int i = 0; i < sizeof...(Tall); ++i) {
+  for (std::size_t i = 0; i < sizeof...(Tall); ++i) {
     if (idxs[i] == n) {
       return i;
     }
@@ -94,7 +94,7 @@ constexpr std::array<order_info, sizeof...(Tall)> calculate_offsets_impl(std::in
 
   arr_t ret = {
       order_info{0u, alignof_for_nth_type_in_order<Tidx, Tall...>(), sizeof_for_nth_type_in_order<Tidx, Tall...>()}...};
-  for (int i = 1; i < sizeof...(Tall); ++i) {
+  for (std::size_t i = 1; i < sizeof...(Tall); ++i) {
     ret[i].offset = ret[i - 1].offset + ret[i - 1].size;
     if (ret[i].offset % ret[i].align != 0) {
       ret[i].offset += ret[i].align - (ret[i].offset % ret[i].align);
