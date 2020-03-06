@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <cstdint>
+#include <cstdlib>
 #include <type_traits>
 
 // Template metaprogramming "logarithmic search"
