@@ -92,46 +92,36 @@ consteval std::size_t log_up_check(int) {
 // Helper: return the middle of a range
 // ====================================
 
-template <std::size_t Start, std::size_t End, std::size_t Next_pow>
+template <std::size_t Start, std::size_t End>
 consteval std::size_t log_in_middle() {
-  return Start + pow2<Next_pow>;
+  return Start + (End - Start)/2;
 }
 
 // Helper: logarithmic search within a range
 // ====================================
 // Returns the actual index of the last matching value
 
-template <typename Lookup, std::size_t Start_idx, std::size_t End_idx, std::size_t Next_pow, typename Id>
+template <typename Lookup, std::size_t Start_idx, std::size_t End_idx, typename Id>
 consteval std::size_t log_in_check(float);
 
-template <typename Lookup, std::size_t Start_idx, std::size_t End_idx, std::size_t Next_pow, typename Id,
-          typename = std::enable_if_t<do_lookup<Lookup, log_in_middle<Start_idx, End_idx, Next_pow>(), Id>()>>
+template <typename Lookup, std::size_t Start_idx, std::size_t End_idx, typename Id,
+          typename = std::enable_if_t<do_lookup<Lookup, log_in_middle<Start_idx, End_idx>(), Id>()>>
 consteval std::size_t log_in_check(int) {
-  // start should exist, otherwise we wouldn't be here
-  if constexpr (Next_pow == 0) {
-    // which means it's this or the next in this case
-    if constexpr (do_lookup<Lookup, Start_idx + 1, Id>()) {
-      return Start_idx + 1;
-    }
+  if constexpr (Start_idx + 1 == End_idx) {
     return Start_idx;
   } else {
-    // the middle doesn't exists -> it should be smaller
-    return log_in_check<Lookup, log_in_middle<Start_idx, End_idx, Next_pow>(), End_idx, Next_pow - 1, Id>(0);
+    // the middle exists -> it should be larger
+    return log_in_check<Lookup, log_in_middle<Start_idx, End_idx>(), End_idx, Id>(0);
   }
 }
 
-template <typename Lookup, std::size_t Start_idx, std::size_t End_idx, std::size_t Next_pow, typename Id>
+template <typename Lookup, std::size_t Start_idx, std::size_t End_idx, typename Id>
 consteval std::size_t log_in_check(float) {
-  // start should exist, otherwise we wouldn't be here
-  if constexpr (Next_pow == 0) {
-    // which means it's this or the next in this case
-    if constexpr (do_lookup<Lookup, Start_idx + 1, Id>()) {
-      return Start_idx + 1;
-    }
+  if constexpr (Start_idx + 1 == End_idx) {
     return Start_idx;
   } else {
     // the middle doesn't exists -> it should be smaller
-    return log_in_check<Lookup, Start_idx, log_in_middle<Start_idx, End_idx, Next_pow>(), Next_pow - 1, Id>(0);
+    return log_in_check<Lookup, Start_idx, log_in_middle<Start_idx, End_idx>(), Id>(0);
   }
 }
 
@@ -151,8 +141,7 @@ consteval std::size_t log_search_v(Lookup const& l, Id* i) {
     return 0;
   } else {
     const std::size_t pow_level_after = pow_level_before + 1;
-    return detail::log_in_check<Lookup, detail::pow2<pow_level_before>, detail::pow2<pow_level_after>,
-                                pow_level_before - 1, Id>(0) +
+    return detail::log_in_check<Lookup, detail::pow2<pow_level_before>, detail::pow2<pow_level_after>, Id>(0) +
            1;
   }
 }
