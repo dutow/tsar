@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <utility>
 #include <tsar/log_search.hpp>
 
 namespace tsar::list {
@@ -131,5 +132,20 @@ consteval bool has_next() {
   // TODO: this could be optimized ...
   return static_cast<long long int>(index_of<LL, Curr, Id>()) < static_cast<long long int>(size(LL{}, Id)) - 1;
 }
+
+///////////////////////////////////////////
+
+// for_each<L, F, Id>
+template <typename L, typename F, auto Id = [](){}, typename Indices = std::make_index_sequence<size(L{}, Id)>>
+constexpr auto for_each() {
+  return for_each_impl<L, F, Id>(Indices{});
+}
+
+template <typename L, typename F, auto Id, std::size_t... Is>
+constexpr auto for_each_impl(std::index_sequence<Is...>) {
+  F f;
+  return f(at<L, Is, Id>()...);
+}
+
 
 }  // namespace tsar::list
