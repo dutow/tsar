@@ -1,7 +1,7 @@
 
 #include "tsar/cts.hpp"
 
-#include <catch.hpp>
+#include "catch.hpp"
 #include <iostream>
 #include <cstring>
 

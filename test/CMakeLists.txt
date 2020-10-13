@@ -15,5 +15,4 @@ ADD_EXECUTABLE(test_unit
   cts_test.cxx
   field_test.cxx
 )
-TARGET_INCLUDE_DIRECTORIES(test_unit PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../Catch2/single_include/catch2")
 ADD_TEST(test_unit test_unit)

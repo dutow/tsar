@@ -2,7 +2,7 @@
 #include "tsar/field.hpp"
 
 #include "tsar/assert.hpp"
-#include <catch.hpp>
+#include "catch.hpp"
 #include <iostream>
 
 using namespace tsar;
