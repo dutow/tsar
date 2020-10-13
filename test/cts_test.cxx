@@ -28,6 +28,6 @@ TEST_CASE("CTS contains the correct value") {
 
   S<s1.get()> s2;
 
-  REQUIRE(strcmp("asdf", s2.get()) == 0);
+  REQUIRE(strcmp("asdf", s2.get().c_str()) == 0);
 }
 

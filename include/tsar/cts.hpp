@@ -18,6 +18,8 @@ struct cts {
 
   constexpr operator char const *() const { return str; }
 
+  constexpr char const * c_str() const { return str; }
+
   constexpr std::size_t size() const { return N; }
 
   friend auto operator<=>(const cts&, const cts&) = default;
