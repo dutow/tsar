@@ -29,17 +29,17 @@ namespace tsar {
   };                                                                   \
   real_type<struct_t, value_type, #name, name##_offset_o __VA_OPT__(, ) __VA_ARGS__> name
 
-#define TSAR_FIELD(type, name, ...) TSAR_FIELD_V(tsar_field_wrap, type, name, __VA_OPT__(, ) __VA_ARGS__)
+#define TSAR_FIELD(type, name, ...) TSAR_FIELD_V(tsar::tsar_field_wrap, type, name, __VA_OPT__(, ) __VA_ARGS__)
 
 #define TSAR_STRUCT(name)                     \
   struct name##_base;                         \
-  using name = tsar_struct_wrap<name##_base>; \
-  struct name##_base : public tsar_struct_base<name##_base, tsar::cts{#name}, tsar_struct_wrap>
+  using name = tsar::tsar_struct_wrap<name##_base>; \
+  struct name##_base : public tsar::tsar_struct_base<name##_base, tsar::cts{#name}, tsar::tsar_struct_wrap>
 
 #define TSAR_STRUCT2(name, wrap)  \
   struct name##_base;             \
   using name = wrap<name##_base>; \
-  struct name##_base : public tsar_struct_base<name>
+  struct name##_base : public tsar::tsar_struct_base<name##_base, tsar::cts{#name}, wrap>
 
 template <typename T, cts NAME>
 struct struct_meta {
@@ -60,10 +60,7 @@ struct tsar_struct_base {
   using tsar_struct_t = tsar_struct_base;
   using tsar_struct_head = tsar::list::head<tsar_struct_t>;
 
-  // klass / meta?
-  static constexpr struct_meta<tsar_struct_base, cts<NAME.size()>{NAME}> meta() {
-    return {};
-  }
+  static const constexpr auto _name = NAME;
 
   constexpr auto wrapped_this() {
     return static_cast<WRAP_T<T>*>(this);
@@ -74,7 +71,9 @@ struct tsar_struct_base {
 
 template <typename T>
 struct tsar_struct_wrap : public T {
-  // nop
+  static constexpr struct_meta<typename T::tsar_struct_t, cts<T::_name.size()>{T::_name}> meta() {
+    return {};
+  }
 };
 
 template <typename STRUCT_T, typename TYPE_T, tsar::cts NAME, typename OFFSET>
