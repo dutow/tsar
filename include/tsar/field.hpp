@@ -20,7 +20,7 @@ namespace tsar {
 // b. we have to use an auto lamdda, as that somehow isn't included in the "no templates" restriction
 #define TSAR_FIELD_V(real_type, value_type, name, ...)                 \
   struct name##_offset_o {                                             \
-    static auto get() {                                                \
+    static consteval auto get() {                                      \
       return [](auto* T) {                                             \
         using TT = typename std::remove_reference<decltype(*T)>::type; \
         return TSAR_OFFSETOF(TT, name);                                \
@@ -43,13 +43,15 @@ namespace tsar {
 
 template <typename T, cts NAME>
 struct struct_meta {
-  constexpr auto name() const {
+  consteval auto name() const {
     return NAME;
   }
 
-
-  constexpr std::size_t size() const {
+  consteval std::size_t size() const {
     return list::size(typename T::tsar_struct_head{}, [](){});
+  }
+
+  consteval void for_each_member() const {
   }
 
 };
@@ -62,7 +64,7 @@ struct tsar_struct_base {
 
   static const constexpr auto _name = NAME;
 
-  constexpr auto wrapped_this() {
+  consteval auto wrapped_this() {
     return static_cast<WRAP_T<T>*>(this);
   }
 
@@ -71,7 +73,7 @@ struct tsar_struct_base {
 
 template <typename T>
 struct tsar_struct_wrap : public T {
-  static constexpr struct_meta<typename T::tsar_struct_t, cts<T::_name.size()>{T::_name}> meta() {
+  static consteval struct_meta<typename T::tsar_struct_t, cts<T::_name.size()>{T::_name}> meta() {
     return {};
   }
 };
@@ -80,9 +82,9 @@ template <typename STRUCT_T, typename TYPE_T, tsar::cts NAME, typename OFFSET>
 struct tsar_field_wrap_composition {  // TODO: only do this with primitives / final classes / unions
   using value_t = TYPE_T;
   using enclosing_t = STRUCT_T;
-  static const constexpr std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
-  // static const constexpr access(STRUCT_T const& t) { return t.CMPTR(); }
-  // static constexpr access(STRUCT_T& t) { return t.MPTR(); }
+  static const consteval std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
+  // static const consteval access(STRUCT_T const& t) { return t.CMPTR(); }
+  // static consteval access(STRUCT_T& t) { return t.MPTR(); }
   //
 
   TYPE_T t = 0;
@@ -134,9 +136,9 @@ struct tsar_field_wrap_inheritance : public TYPE_T {
   template <typename... Args>
   tsar_field_wrap_inheritance(Args&&... args) : TYPE_T(std::forward<Args>(args)...) {}
 
-  static const constexpr std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
-  // static const constexpr access(STRUCT_T const& t) { return t.CMPTR(); }
-  // static constexpr access(STRUCT_T& t) { return t.MPTR(); }
+  static const consteval std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
+  // static const consteval access(STRUCT_T const& t) { return t.CMPTR(); }
+  // static consteval access(STRUCT_T& t) { return t.MPTR(); }
 
   enclosing_t& enclosing() { return *reinterpret_cast<enclosing_t*>(reinterpret_cast<char*>(this) - offset()); }
 
@@ -158,7 +160,7 @@ struct tsar_field_wrap_inheritance : public TYPE_T {
 
 template <typename STRUCT_T, typename TYPE_T, tsar::cts NAME, typename OFFSET>
 struct tsar_field_wrap_helper{
-  static constexpr bool use_inheritance() {
+  static consteval bool use_inheritance() {
     return std::is_class_v<TYPE_T> && !std::is_final_v<TYPE_T>;
   }
 
