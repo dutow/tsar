@@ -63,3 +63,6 @@ struct to_array {
 };
 
 static_assert(equals<for_each<A_LIST, to_array>().size(), 2>());
+
+// with a lambda!
+static_assert(equals<for_each<A_LIST>([](auto... args){ return sizeof...(args); }), 2>());
