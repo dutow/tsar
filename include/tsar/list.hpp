@@ -41,19 +41,19 @@ struct head {
 
 template <typename L, std::size_t N, typename Id,
           typename R = decltype(get_nth(typename head<L>::template index<N>{}, Id{}))>
-constexpr bool nth_exists(int) {
+consteval bool nth_exists(int) {
   return true;
 };
 
 template <typename L, std::size_t N, typename Id>
-constexpr bool nth_exists(float) {
+consteval bool nth_exists(float) {
   return false;
 };
 
 ///////////////////////////////////////////
 
 template <typename L, typename Id>
-constexpr std::size_t size(L, Id) {
+consteval std::size_t size(L, Id) {
   // TODO: why I have to specify the parameter here?
   auto l = []<std::size_t Idx, typename Id2>() { return nth_exists<L, Idx, Id2>(0); };
   return log_search_v<decltype(l), Id>();
@@ -137,12 +137,12 @@ consteval bool has_next() {
 
 // for_each<L, F, Id>
 template <typename L, typename F, auto Id = [](){}, typename Indices = std::make_index_sequence<size(L{}, Id)>>
-constexpr auto for_each() {
+consteval auto for_each() {
   return for_each_impl<L, F, Id>(Indices{});
 }
 
 template <typename L, typename F, auto Id, std::size_t... Is>
-constexpr auto for_each_impl(std::index_sequence<Is...>) {
+consteval auto for_each_impl(std::index_sequence<Is...>) {
   F f;
   return f(at<L, Is, Id>()...);
 }
