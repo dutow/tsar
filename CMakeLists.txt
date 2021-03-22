@@ -1,16 +1,14 @@
 
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.18)
 project(tsar)
 
 enable_testing()
 
-set(CMAKE_CXX_STANDARD 20)
+add_library(tsar INTERFACE)
+target_include_directories(tsar INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_options(tsar INTERFACE "-Wno-invalid-offsetof")
+target_compile_features(tsar INTERFACE cxx_std_20)
 
-if(MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+if(BUILD_TESTING)
+  add_subdirectory(test)
 endif()
-
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=undefined")
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_subdirectory(test)
