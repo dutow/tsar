@@ -5,17 +5,10 @@
 #include <type_traits>
 #include <utility>
 
+#include "tsar/compiler_support.hpp"
+
 #include "tsar/cts.hpp"
 #include "tsar/list.hpp"
-
-#ifdef __clang__
-// Clang 14.1 doesn't seem to support TSAR_CONSTEVAL completely, it errors out. 
-// GCC is fine
-// Probably clang issue, as website says TSAR_CONSTEVAL support is incomplete
-#define TSAR_CONSTEVAL constexpr
-#else
-#define TSAR_CONSTEVAL consteval
-#endif
 
 namespace tsar {
 
@@ -47,10 +40,10 @@ namespace tsar {
   using name = tsar::tsar_struct_wrap<name##_base>; \
   struct name##_base : public tsar::tsar_struct_base<name##_base, tsar::cts{#name}, tsar::tsar_struct_wrap>
 
-#define TSAR_STRUCT2(name, wrap)  \
+#define TSAR_STRUCT2(name, wrap, ...)  \
   struct name##_base;             \
   using name = wrap<name##_base>; \
-  struct name##_base : public tsar::tsar_struct_base<name##_base, tsar::cts{#name}, wrap>
+  struct name##_base : public tsar::tsar_struct_base<name##_base, tsar::cts{#name}, wrap> __VA_OPT__(,) __VA_ARGS__
 
 #define TSAR_PROTECTED_COPY_AND_MOVE(T) \
  protected:                             \
@@ -77,6 +70,8 @@ struct field_meta {
 
 template <typename T, cts NAME>
 struct struct_meta {
+  using list_t = typename T::tsar_struct_head;
+
   TSAR_CONSTEVAL auto name() const { return NAME; }
 
   TSAR_CONSTEVAL std::size_t size() const {
@@ -86,7 +81,7 @@ struct struct_meta {
   template <std::size_t IDX>
   TSAR_CONSTEVAL auto member_at() const {
     using item_t = std::remove_pointer_t<decltype(list::at<typename T::tsar_struct_head, IDX, []() {}>())>;
-    return item_t::meta();
+    return item_t::tsar_meta();
   }
 };
 
@@ -113,12 +108,12 @@ struct tsar_field_wrap_composition {
   using value_t = TYPE_T;
   using enclosing_t = STRUCT_T;
 
-  static TSAR_CONSTEVAL field_meta<STRUCT_T, tsar_field_wrap_composition, cts<NAME.size()>{NAME}> meta() { return {}; }
+  static TSAR_CONSTEVAL field_meta<STRUCT_T, tsar_field_wrap_composition, cts<NAME.size()>{NAME}> tsar_meta() { return {}; }
 
   static const TSAR_CONSTEVAL std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
 
   TYPE_T t = 0;
-  [[no_unique_address]] tsar::list::link<typename STRUCT_T::tsar_struct_head, tsar_field_wrap_composition> l;
+  [[no_unique_address]] tsar::list::link<typename STRUCT_T::tsar_struct_head, tsar_field_wrap_composition> tsar_link;
 
   tsar_field_wrap_composition() : t() {}
 
@@ -159,14 +154,21 @@ struct tsar_field_wrap_inheritance : public TYPE_T {
   using value_t = TYPE_T;
   using enclosing_t = STRUCT_T;
 
-  [[no_unique_address]] tsar::list::link<typename STRUCT_T::tsar_struct_head, tsar_field_wrap_inheritance> l;
+  [[no_unique_address]] tsar::list::link<typename STRUCT_T::tsar_struct_head, tsar_field_wrap_inheritance> tsar_link;
 
   using TYPE_T::TYPE_T;
 
   template <typename... Args>
   tsar_field_wrap_inheritance(Args&&... args) : TYPE_T(std::forward<Args>(args)...) {}
 
-  static TSAR_CONSTEVAL field_meta<STRUCT_T, tsar_field_wrap_inheritance, cts<NAME.size()>{NAME}> meta() { return {}; }
+  template <typename... Args>
+  tsar_field_wrap_inheritance& operator=(Args&&... args) {
+    TYPE_T::operator=(std::forward<Args>(args)...);
+    return *this;
+  }
+
+
+  static TSAR_CONSTEVAL field_meta<STRUCT_T, tsar_field_wrap_inheritance, cts<NAME.size()>{NAME}> tsar_meta() { return {}; }
 
   static const TSAR_CONSTEVAL std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
   // static const TSAR_CONSTEVAL access(STRUCT_T const& t) { return t.CMPTR(); }
@@ -230,14 +232,14 @@ struct tsar_field_wrap_t : public TYPE_T<wrap_magic<STRUCT_T, OFFSET>> {
   static_assert(!constructivity_check<value_t>::ca, "Context aware types can't have public copy assignment operators");
   static_assert(!constructivity_check<value_t>::ma, "Context aware types can't have public move assignment operators");
 
-  [[no_unique_address]] tsar::list::link<typename STRUCT_T::tsar_struct_head, tsar_field_wrap_t> l;
+  [[no_unique_address]] tsar::list::link<typename STRUCT_T::tsar_struct_head, tsar_field_wrap_t> tsar_link;
 
   using value_t::value_t;
 
   template <typename... Args>
   tsar_field_wrap_t(Args&&... args) : value_t(std::forward<Args>(args)...) {}
 
-  static TSAR_CONSTEVAL field_meta<STRUCT_T, tsar_field_wrap_t, cts<NAME.size()>{NAME}> meta() { return {}; }
+  static TSAR_CONSTEVAL field_meta<STRUCT_T, tsar_field_wrap_t, cts<NAME.size()>{NAME}> tsar_meta() { return {}; }
 
   static const TSAR_CONSTEVAL std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
 
