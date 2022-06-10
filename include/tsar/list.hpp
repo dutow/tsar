@@ -135,16 +135,17 @@ consteval bool has_next() {
 
 ///////////////////////////////////////////
 
+template <typename L, typename F, auto Id, std::size_t... Is>
+consteval auto for_each_impl(F f, std::index_sequence<Is...>) {
+  return f(at<L, Is, Id>()...);
+}
+
 // for_each<L, F, Id>
 template <typename L, typename F, auto Id = [](){}, typename Indices = std::make_index_sequence<size(L{}, Id)>>
 consteval auto for_each(F f = {}) {
   return for_each_impl<L, F, Id>(f, Indices{});
 }
 
-template <typename L, typename F, auto Id, std::size_t... Is>
-consteval auto for_each_impl(F f, std::index_sequence<Is...>) {
-  return f(at<L, Is, Id>()...);
-}
 
 
 }  // namespace tsar::list

@@ -147,7 +147,7 @@ consteval std::size_t log_search_v(Lookup const& l, Id* i) {
 }
 
 // Only use this in non template ctx
-template <typename Lookup, auto Id = []() {}>
+template <typename Lookup, auto Id>
 consteval std::size_t log_search(Lookup const& l) {
   return log_search_v(l, static_cast<decltype(Id)*>(nullptr));
 }
