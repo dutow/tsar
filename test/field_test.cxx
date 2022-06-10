@@ -32,6 +32,10 @@ TEST_CASE("Fields work, even with local types!") {
 struct custom_type {
   int i;
 
+  // TODO: clang 14 fails to compile without a constructor
+  // compiles fine if this constructor is here
+  explicit custom_type(int i) : i(i) {}
+
   operator int() const { return i; }
 };
 

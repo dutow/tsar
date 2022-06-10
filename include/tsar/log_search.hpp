@@ -57,13 +57,10 @@ template <std::size_t I>
 constexpr const std::size_t pow2 = pow2<I - 1> * 2;
 
 template <>
-constexpr std::size_t pow2<0> = 1;
+inline constexpr std::size_t pow2<0> = 1;
 
 template <>
-constexpr std::size_t pow2<size_t_bits> = (pow2<size_t_bits - 1> - 1) * 2 + 1;
-
-// instantaite explicitly
-template std::size_t pow2<size_t_bits>;
+inline constexpr std::size_t pow2<size_t_bits> = (pow2<size_t_bits - 1> - 1) * 2 + 1;
 
 // Helper: does a lookup to enable Lookup based SFINAE
 // ====================================

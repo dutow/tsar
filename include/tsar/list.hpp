@@ -69,7 +69,7 @@ struct link {
   static constexpr const std::size_t idx = size(L{}, []() {});
 
   template <typename Id>
-  friend consteval auto get_nth(head<L>::template index<idx>, Id) noexcept {
+  friend consteval auto get_nth(typename head<L>::template index<idx>, Id) noexcept {
     return static_cast<T*>(nullptr);
   }
 
