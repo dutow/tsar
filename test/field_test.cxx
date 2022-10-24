@@ -121,7 +121,7 @@ TEST_CASE("Containing type awareness") {
     TSAR_FIELD_T(ctx_aware, b);
   };
 
-  foo f{};
+  foo f;
   f.a = 10;
 
   // compilation error!
@@ -138,7 +138,7 @@ TEST_CASE("Containing type awareness and copies") {
 
   static_assert(equals<foo::meta().member_at<1>().offset(), 4>());
 
-  foo f{};
+  foo f;
   f.a = 10;
 
   foo f2 = f;

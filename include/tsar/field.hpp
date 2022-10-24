@@ -14,7 +14,7 @@ namespace tsar {
 
 #define TSAR_OFFSETOF offsetof
 
-// NOTE: offset_o helper os complex because
+// NOTE: offset_of helper is complex because
 // a. the member isn't even named in the source at this point
 // b. we want this to work even as a local type within a function, where we can't define template functions
 // To fix this:
@@ -25,14 +25,22 @@ namespace tsar {
     static TSAR_CONSTEVAL auto get() {                                      \
       return [](auto* T) {                                             \
         using TT = typename std::remove_reference<decltype(*T)>::type; \
+        _Pragma("GCC diagnostic push") \
+        _Pragma("GCC diagnostic ignored \"-Winvalid-offsetof\"") \
         return TSAR_OFFSETOF(TT, name);                                \
+        _Pragma("GCC diagnostic pop") \
       };                                                               \
     }                                                                  \
   };                                                                   \
-  real_type<struct_t, value_type, #name, name##_offset_o __VA_OPT__(, ) __VA_ARGS__> name
+  using tsar_##name = real_type<struct_t, value_type, #name, name##_offset_o __VA_OPT__(, ) __VA_ARGS__>; \
+  tsar_##name name
 
+  // ^ the above using is only there to make error messages a bit more readable, maybe?
+
+// TODO: make field_wrap customizable
 #define TSAR_FIELD(type, name, ...) TSAR_FIELD_V(tsar::tsar_field_wrap, type, name, __VA_OPT__(, ) __VA_ARGS__)
 
+// TODO: make field_wrap customizable!
 #define TSAR_FIELD_T(type, name, ...) TSAR_FIELD_V(tsar::tsar_field_wrap_t, type, name, __VA_OPT__(, ) __VA_ARGS__)
 
 #define TSAR_STRUCT(name)                           \
@@ -93,7 +101,7 @@ struct tsar_struct_base {
 
   static const constexpr auto _name = NAME;
 
-  TSAR_CONSTEVAL auto wrapped_this() { return static_cast<WRAP_T<T>*>(this); }
+  auto wrapped_this() { return static_cast<WRAP_T<T>*>(this); }
 
   // + instance meta
 };
@@ -192,6 +200,9 @@ struct tsar_field_wrap_inheritance : public TYPE_T {
   friend STRUCT_T;
 };
 
+
+// TODO: make this customizable in a wrap configuration
+// TODO: also make it a consteval function instead with if constexpr
 template <typename STRUCT_T, typename TYPE_T, tsar::cts NAME, typename OFFSET>
 struct tsar_field_wrap_helper {
   static TSAR_CONSTEVAL bool use_inheritance() { return std::is_class_v<TYPE_T> && !std::is_final_v<TYPE_T>; }
@@ -236,9 +247,6 @@ struct tsar_field_wrap_t : public TYPE_T<wrap_magic<STRUCT_T, OFFSET>> {
 
   using value_t::value_t;
 
-  template <typename... Args>
-  tsar_field_wrap_t(Args&&... args) : value_t(std::forward<Args>(args)...) {}
-
   static TSAR_CONSTEVAL field_meta<STRUCT_T, tsar_field_wrap_t, cts<NAME.size()>{NAME}> tsar_meta() { return {}; }
 
   static const TSAR_CONSTEVAL std::size_t offset() { return OFFSET::get()(static_cast<STRUCT_T*>(nullptr)); }
@@ -249,10 +257,23 @@ struct tsar_field_wrap_t : public TYPE_T<wrap_magic<STRUCT_T, OFFSET>> {
     return *reinterpret_cast<const enclosing_t*>(reinterpret_cast<const char*>(&this) - offset());
   }
 
+  template <typename... Args>
+  tsar_field_wrap_t& operator=(Args&&... args) {
+    value_t::operator=(std::forward<Args>(args)...);
+    return *this;
+  }
+
  private:
   // Try to keep these fields within the struct itself
+  // The best way to do it is by disallowing construction from the outside
 
-  tsar_field_wrap_t(tsar_field_wrap_t const&) = default;
+  tsar_field_wrap_t() = default;
+
+  template <typename... Args>
+  tsar_field_wrap_t(Args&&... args) : value_t(std::forward<Args>(args)...) {}
+
+  tsar_field_wrap_t(tsar_field_wrap_t const& o) = default;
+    
   tsar_field_wrap_t(tsar_field_wrap_t&&) = default;
 
   tsar_field_wrap_t& operator=(tsar_field_wrap_t const&) = default;
